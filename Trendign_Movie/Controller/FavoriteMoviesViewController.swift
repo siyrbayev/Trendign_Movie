@@ -29,9 +29,7 @@ class FavoriteMoviesViewController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        if !movieEntityCoreDataManager.allMovies().isEmpty {
-            movies = movieEntityCoreDataManager.allMovies()
-        }
+        movies = movieEntityCoreDataManager.allMovies()
     }
     
 }

@@ -12,12 +12,12 @@ class TrendingMoviesViewController: UIViewController {
     
     private let TRENDING_MOVIES_URL = "https://api.themoviedb.org/3/trending/movie/week?api_key=00133da9de6d883e708e1c2aee13de35"
 
-    @IBOutlet weak private var trendingTableView: UITableView!
+    @IBOutlet weak var trendingTableView: UITableView!
     
     
     private var pageNumber: Int = 1
     
-    private var movies: [MovieEntity.Movie] = [MovieEntity.Movie]() {
+    private var movies: [TrendingMovieEntity.Movie] = [TrendingMovieEntity.Movie]() {
         didSet{
             trendingTableView.reloadData()
         }
@@ -25,17 +25,19 @@ class TrendingMoviesViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        getTrendingMovies(pageNumber)
         configTrendingTableView()
+        getTrendingMovies(pageNumber)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        trendingTableView.reloadData()
     }
     
     func configTrendingTableView() {
         trendingTableView.dataSource = self
         trendingTableView.delegate = self
-        trendingTableView.showsHorizontalScrollIndicator = false
-        trendingTableView.showsVerticalScrollIndicator = false
         trendingTableView.register(TrendingMovieTableViewCell.nib, forCellReuseIdentifier: TrendingMovieTableViewCell.identifier)
-        trendingTableView.contentInset = UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0)
+        trendingTableView.showsVerticalScrollIndicator = false
     }
 
     
@@ -54,7 +56,7 @@ extension TrendingMoviesViewController {
             case .success:
                 if let data = response.data {
                     do {
-                        let movieJSON = try JSONDecoder().decode(MovieEntity.self, from: data)
+                        let movieJSON = try JSONDecoder().decode(TrendingMovieEntity.self, from: data)
                         self.movies += movieJSON.results
                     } catch let JSONErr {
                         print(JSONErr)
@@ -75,6 +77,9 @@ extension TrendingMoviesViewController: UITableViewDelegate{
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
         let vc = storyboard.instantiateViewController(withIdentifier: MovieDetailsViewController.idetifier) as! MovieDetailsViewController
         vc.configure(movieId: movies[indexPath.row].id)
+        vc.reloadRowCallBack = {
+            self.trendingTableView.reloadData()
+        }
         navigationController?.pushViewController(vc, animated: true)
     }
     
@@ -102,10 +107,11 @@ extension TrendingMoviesViewController: UITableViewDataSource{
     
         let cell = tableView.dequeueReusableCell(withIdentifier: TrendingMovieTableViewCell.identifier, for: indexPath) as! TrendingMovieTableViewCell
         
-        cell.configure(movie: movies[indexPath.row])
+        cell.movie = movies[indexPath.row]
+        cell.reloadTableViewCallBack = {
+            self.trendingTableView.reloadData()
+        }
+        
         return cell
     }
-    
-    
 }
-

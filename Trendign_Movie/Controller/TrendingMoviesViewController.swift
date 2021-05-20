@@ -33,18 +33,19 @@ class TrendingMoviesViewController: UIViewController {
         trendingTableView.reloadData()
     }
     
+}
+// MARK - Internal Func
+extension TrendingMoviesViewController {
     func configTrendingTableView() {
         trendingTableView.dataSource = self
         trendingTableView.delegate = self
         trendingTableView.register(TrendingMovieTableViewCell.nib, forCellReuseIdentifier: TrendingMovieTableViewCell.identifier)
         trendingTableView.showsVerticalScrollIndicator = false
+        trendingTableView.estimatedRowHeight = 400
+                trendingTableView.rowHeight = UITableView.automaticDimension
+
     }
-
     
-
-}
-// MARK - Internal Func
-extension TrendingMoviesViewController {
     private func getTrendingMovies(_ page: Int? = nil){
         var params: [String: Any] = [:]
         if let page = page {
@@ -104,7 +105,7 @@ extension TrendingMoviesViewController: UITableViewDataSource{
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: TrendingMovieTableViewCell.identifier, for: indexPath) as! TrendingMovieTableViewCell
         
         cell.movie = movies[indexPath.row]

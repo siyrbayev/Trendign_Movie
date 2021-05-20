@@ -17,19 +17,23 @@ class FavoriteMoviesViewController: UIViewController {
             if movies.count != oldMovies.count {
                 favoriteTableView.reloadData()
             }
-            
         }
     }
     
     final let movieEntityCoreDataManager = MovieEntityCoreDataManager.shared
-    
     @IBOutlet weak private var favoriteTableView: UITableView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configureFavoriteTableView()
-        movies = movieEntityCoreDataManager.allMovies()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        if !movieEntityCoreDataManager.allMovies().isEmpty {
+            movies = movieEntityCoreDataManager.allMovies()
+        }
+    }
+    
 }
 
 // MARK - Internal Func
@@ -39,6 +43,29 @@ extension FavoriteMoviesViewController {
         favoriteTableView.dataSource = self
         favoriteTableView.register(TrendingMovieTableViewCell.nib, forCellReuseIdentifier: TrendingMovieTableViewCell.identifier)
         favoriteTableView.showsVerticalScrollIndicator = false
+        favoriteTableView.separatorStyle = .none
+    }
+}
+
+extension UITableView {
+
+    func setEmptyMessage(_ message: String) {
+        let messageLabel = UILabel(frame: CGRect(x: 0, y: 0, width: self.bounds.size.width, height: self.bounds.size.height))
+        messageLabel.text = message
+        messageLabel.textColor = .black
+        messageLabel.numberOfLines = 0
+        messageLabel.textAlignment = .center
+        messageLabel.font = .systemFont(ofSize: 20)
+        messageLabel.tintColor = .darkGray
+        messageLabel.sizeToFit()
+
+        self.backgroundView = messageLabel
+        self.separatorStyle = .none
+    }
+
+    func restore() {
+        self.backgroundView = nil
+        self.separatorStyle = .singleLine
     }
 }
 
@@ -46,7 +73,12 @@ extension FavoriteMoviesViewController {
 extension FavoriteMoviesViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        movies.count
+        if movies.count == 0 {
+                self.favoriteTableView.setEmptyMessage("Favorite movies is empty")
+            } else {
+                self.favoriteTableView.restore()
+            }
+        return movies.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
